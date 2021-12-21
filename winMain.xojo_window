@@ -10,20 +10,20 @@ Begin DesktopWindow winMain
    HasFullScreenButton=   False
    HasMaximizeButton=   True
    HasMinimizeButton=   True
-   Height          =   400
+   Height          =   92
    ImplicitInstance=   True
    MacProcID       =   0
    MaximumHeight   =   32000
    MaximumWidth    =   32000
    MenuBar         =   715411455
    MenuBarVisible  =   False
-   MinimumHeight   =   64
-   MinimumWidth    =   64
+   MinimumHeight   =   92
+   MinimumWidth    =   300
    Resizeable      =   True
-   Title           =   "Untitled"
+   Title           =   "API Ninjas Demo"
    Type            =   0
    Visible         =   True
-   Width           =   600
+   Width           =   300
    Begin DesktopButton btnUpload
       AllowAutoDeactivate=   True
       Bold            =   False
@@ -37,7 +37,7 @@ Begin DesktopWindow winMain
       Height          =   20
       Index           =   -2147483648
       Italic          =   False
-      Left            =   20
+      Left            =   100
       LockBottom      =   False
       LockedInPosition=   False
       LockLeft        =   True
@@ -49,11 +49,17 @@ Begin DesktopWindow winMain
       TabPanelIndex   =   0
       TabStop         =   True
       Tooltip         =   ""
-      Top             =   20
+      Top             =   36
       Transparent     =   False
       Underline       =   False
       Visible         =   True
       Width           =   100
+   End
+   Begin APINinjas ctlNinja
+      Index           =   -2147483648
+      LockedInPosition=   False
+      Scope           =   2
+      TabPanelIndex   =   0
    End
 End
 #tag EndDesktopWindow
@@ -61,6 +67,58 @@ End
 #tag WindowCode
 #tag EndWindowCode
 
+#tag Events btnUpload
+	#tag Event
+		Sub Pressed()
+		  // Filter / FileTypes workaround
+		  var ftImage as new FileType
+		  ftImage.Name = "Image"
+		  ftImage.Extensions = ".jpg;.png"
+		  
+		  // Select the image
+		  var md as new OpenFileDialog
+		  md.PromptText = "Select an image to upload."
+		  md.Filter = ftImage
+		  
+		  md.ActionButtonCaption = "Select"
+		  
+		  var fSelect as FolderItem = md.ShowModal
+		  
+		  // User cancelled
+		  if fSelect = nil then return
+		  
+		  // Let's goo!
+		  ctlNinja.ImageToText(fSelect)
+		  
+		  me.Enabled = false
+		End Sub
+	#tag EndEvent
+#tag EndEvents
+#tag Events ctlNinja
+	#tag Event
+		Sub ImageTextReceived(sText as String)
+		  var md as new MessageDialog
+		  md.Message = "Image to Text Response"
+		  md.Explanation = "The image contained the text:" + EndOfLine + EndOfLine + sText
+		  
+		  call md.ShowModal
+		  
+		  btnUpload.Enabled = true
+		End Sub
+	#tag EndEvent
+	#tag Event
+		Sub RequestError(iCode as Integer, sMessage as String)
+		  var md as new MessageDialog
+		  md.Message = "API Ninjas Request Failed"
+		  md.Explanation = "The request to API Ninjas failed with the message: " + _
+		  sMessage + EndOfLine + "Code: " + iCode.ToString
+		  
+		  call md.ShowModal
+		  
+		  btnUpload.Enabled = true
+		End Sub
+	#tag EndEvent
+#tag EndEvents
 #tag ViewBehavior
 	#tag ViewProperty
 		Name="Name"
