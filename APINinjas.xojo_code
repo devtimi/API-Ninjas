@@ -2,18 +2,11 @@
 Protected Class APINinjas
 	#tag Method, Flags = &h0
 		Sub ImageToText(fImage as FolderItem)
-		  var oSock as new URLConnection
-		  oSock.RequestHeader("X-Api-Key") = kAPIKey
-		  
 		  var dictData as new Dictionary
 		  dictData.Value("image") = fImage
 		  
+		  var oSock as URLConnection = NewSocket
 		  SetFormData(oSock, dictData)
-		  
-		  AddHandler oSock.ContentReceived, WeakAddressOf SocketContentReceived
-		  AddHandler oSock.Error, WeakAddressOf SocketError
-		  
-		  maroSockets.Add(oSock)
 		  
 		  // Send the request
 		  oSock.Send("POST", "https://api.api-ninjas.com/v1/imagetotext")
@@ -37,6 +30,23 @@ Protected Class APINinjas
 		    return "image/png"
 		    
 		  end select
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Function NewSocket() As URLConnection
+		  // Create the socket and provide the API key header
+		  var oSock as new URLConnection
+		  oSock.RequestHeader("X-Api-Key") = kAPIKey
+		  
+		  // Connect handlers
+		  AddHandler oSock.ContentReceived, WeakAddressOf SocketContentReceived
+		  AddHandler oSock.Error, WeakAddressOf SocketError
+		  
+		  // Retain the socket
+		  maroSockets.Add(oSock)
+		  
+		  return oSock
 		End Function
 	#tag EndMethod
 
@@ -170,17 +180,12 @@ Protected Class APINinjas
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		  var oSock as new URLConnection
-		  oSock.RequestHeader("X-Api-Key") = kAPIKey
 		Sub TextLanguage(sText As String)
 		  // The API limits the document to 1000 characters
 		  if sText.Length > 1000 then sText = sText.Right(1000)
 		  sText = sText.ReplaceLineEndings(EndOfLine.UNIX)
 		  
-		  AddHandler oSock.ContentReceived, WeakAddressOf SocketContentReceived
-		  AddHandler oSock.Error, WeakAddressOf SocketError
-		  
-		  maroSockets.Add(oSock)
+		  var oSock as URLConnection = NewSocket
 		  
 		  // Send the request
 		  oSock.Send("GET", "https://api.api-ninjas.com/v1/textlanguage?text=" + EncodeURLComponent(sText))
