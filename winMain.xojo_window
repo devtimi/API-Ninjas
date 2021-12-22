@@ -28,7 +28,7 @@ Begin DesktopWindow winMain
       AllowAutoDeactivate=   True
       Bold            =   False
       Cancel          =   False
-      Caption         =   "Upload File"
+      Caption         =   "Upload Image"
       Default         =   False
       Enabled         =   True
       FontName        =   "System"
@@ -49,7 +49,7 @@ Begin DesktopWindow winMain
       TabPanelIndex   =   0
       TabStop         =   True
       Tooltip         =   ""
-      Top             =   36
+      Top             =   20
       Transparent     =   False
       Underline       =   False
       Visible         =   True
@@ -60,6 +60,37 @@ Begin DesktopWindow winMain
       LockedInPosition=   False
       Scope           =   2
       TabPanelIndex   =   0
+   End
+   Begin DesktopButton btnUploadText
+      AllowAutoDeactivate=   True
+      Bold            =   False
+      Cancel          =   False
+      Caption         =   "Upload Text"
+      Default         =   False
+      Enabled         =   True
+      FontName        =   "System"
+      FontSize        =   0.0
+      FontUnit        =   0
+      Height          =   20
+      Index           =   -2147483648
+      Italic          =   False
+      Left            =   100
+      LockBottom      =   False
+      LockedInPosition=   False
+      LockLeft        =   True
+      LockRight       =   False
+      LockTop         =   True
+      MacButtonStyle  =   0
+      Scope           =   2
+      TabIndex        =   1
+      TabPanelIndex   =   0
+      TabStop         =   True
+      Tooltip         =   ""
+      Top             =   41
+      Transparent     =   False
+      Underline       =   False
+      Visible         =   True
+      Width           =   100
    End
 End
 #tag EndDesktopWindow
@@ -116,6 +147,48 @@ End
 		  call md.ShowModal
 		  
 		  btnUpload.Enabled = true
+		  btnUploadText.Enabled = true
+		End Sub
+	#tag EndEvent
+	#tag Event
+		Sub DocumentLanguageReceived(Language As String, ISOCode As String)
+		  var md as new MessageDialog
+		  md.Message = "Language Detection Response"
+		  md.Explanation = "The document is written in :" + EndOfLine + EndOfLine + Language + "(" + ISOCode + ")"
+		  
+		  call md.ShowModal
+		  
+		  btnUploadText.Enabled = true
+		End Sub
+	#tag EndEvent
+#tag EndEvents
+#tag Events btnUploadText
+	#tag Event
+		Sub Pressed()
+		  // Filter / FileTypes workaround
+		  var ftImage as new FileType
+		  ftImage.Name = "Text"
+		  ftImage.Extensions = ".txt;.md"
+		  
+		  // Select the document whose language we need to detect
+		  var md as new OpenFileDialog
+		  md.PromptText = "Select a text file to upload."
+		  md.Filter = ftImage
+		  
+		  md.ActionButtonCaption = "Select"
+		  
+		  var fSelect as FolderItem = md.ShowModal
+		  
+		  // User cancelled
+		  if fSelect = nil then return
+		  
+		  // Let's goo!
+		  Dim bs As BinaryStream = BinaryStream.Open(fSelect)
+		  Dim txt As String = bs.Read(bs.Length)
+		  bs.Close()
+		  ctlNinja.TextLanguage(txt)
+		  
+		  me.Enabled = false
 		End Sub
 	#tag EndEvent
 #tag EndEvents
