@@ -47,9 +47,11 @@ Protected Class APINinjas
 		    RaiseEvent ImageTextReceived(jsItem.Value("text").StringValue.DefineEncoding(Encodings.UTF8))
 		    
 		  elseif jsItem.HasKey("language") then
-		    Dim lang, iso As String
+		    var lang, iso as String
+		    
 		    lang = jsItem.Value("language").StringValue.DefineEncoding(Encodings.UTF8)
 		    iso = jsItem.Value("iso").StringValue.DefineEncoding(Encodings.UTF8)
+		    
 		    RaiseEvent DocumentLanguageReceived(lang, iso)
 		    
 		  end
@@ -168,11 +170,12 @@ Protected Class APINinjas
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub TextLanguage(Text As String)
-		  ' The API limits the document to 1000 characters
-		  If Text.Length > 1000 Then Text = Text.Right(1000)
 		  var oSock as new URLConnection
 		  oSock.RequestHeader("X-Api-Key") = kAPIKey
+		Sub TextLanguage(sText As String)
+		  // The API limits the document to 1000 characters
+		  if sText.Length > 1000 then sText = sText.Right(1000)
+		  sText = sText.ReplaceLineEndings(EndOfLine.UNIX)
 		  
 		  AddHandler oSock.ContentReceived, WeakAddressOf SocketContentReceived
 		  AddHandler oSock.Error, WeakAddressOf SocketError
@@ -180,7 +183,7 @@ Protected Class APINinjas
 		  maroSockets.Add(oSock)
 		  
 		  // Send the request
-		  oSock.Send("GET", "https://api.api-ninjas.com/v1/textlanguage?text=" + Text)
+		  oSock.Send("GET", "https://api.api-ninjas.com/v1/textlanguage?text=" + EncodeURLComponent(sText))
 		End Sub
 	#tag EndMethod
 

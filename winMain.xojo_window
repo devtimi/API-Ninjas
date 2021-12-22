@@ -183,9 +183,10 @@ End
 		  if fSelect = nil then return
 		  
 		  // Let's goo!
-		  Dim bs As BinaryStream = BinaryStream.Open(fSelect)
-		  Dim txt As String = bs.Read(1000)
+		  var bs as BinaryStream = BinaryStream.Open(fSelect)
+		  var txt as String = bs.Read(1000)
 		  bs.Close()
+		  
 		  ctlNinja.TextLanguage(txt)
 		  
 		  me.Enabled = false
