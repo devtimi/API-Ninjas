@@ -86,7 +86,7 @@ Begin DesktopWindow winMain
       TabPanelIndex   =   0
       TabStop         =   True
       Tooltip         =   ""
-      Top             =   41
+      Top             =   52
       Transparent     =   False
       Underline       =   False
       Visible         =   True
