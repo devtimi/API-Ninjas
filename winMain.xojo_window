@@ -184,7 +184,7 @@ End
 		  
 		  // Let's goo!
 		  Dim bs As BinaryStream = BinaryStream.Open(fSelect)
-		  Dim txt As String = bs.Read(bs.Length)
+		  Dim txt As String = bs.Read(1000)
 		  bs.Close()
 		  ctlNinja.TextLanguage(txt)
 		  
