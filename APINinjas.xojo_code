@@ -151,6 +151,7 @@ Protected Class APINinjas
 		    
 		  catch ex as JSONException
 		    // Bad response content
+		    RaiseEvent RequestError(ex.ErrorNumber, ex.Message)
 		    
 		  end try
 		  
