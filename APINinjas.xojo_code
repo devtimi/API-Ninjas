@@ -46,6 +46,12 @@ Protected Class APINinjas
 		  if jsItem.HasKey("text") then
 		    RaiseEvent ImageTextReceived(jsItem.Value("text").StringValue.DefineEncoding(Encodings.UTF8))
 		    
+		  elseif jsItem.HasKey("language") then
+		    Dim lang, iso As String
+		    lang = jsItem.Value("language").StringValue.DefineEncoding(Encodings.UTF8)
+		    iso = jsItem.Value("iso").StringValue.DefineEncoding(Encodings.UTF8)
+		    RaiseEvent DocumentLanguageReceived(lang, iso)
+		    
 		  end
 		End Sub
 	#tag EndMethod
@@ -122,13 +128,19 @@ Protected Class APINinjas
 		    var jsResponse as new JSONItem(sContent.Trim)
 		    
 		    if iCode = 200 then
-		      // Iterate the response array
-		      var iMax as Integer = jsResponse.Count - 1
-		      for i as Integer = 0 to iMax
-		        var jsThis as JSONItem = jsResponse.ChildAt(i)
-		        ParseResponseItem(jsThis)
+		      if sURL.IndexOf("/v1/textlanguage") > -1 then // TextLanguage response
+		        ParseResponseItem(jsResponse)
 		        
-		      next i
+		      elseif sURL.IndexOf("/v1/imagetotext") > -1 then // ImageToText response
+		        // Iterate the response array
+		        var iMax as Integer = jsResponse.Count - 1
+		        for i as Integer = 0 to iMax
+		          var jsThis as JSONItem = jsResponse.ChildAt(i)
+		          ParseResponseItem(jsThis)
+		          
+		        next i
+		        
+		      end if
 		      
 		    else
 		      // Error occured
@@ -154,6 +166,27 @@ Protected Class APINinjas
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		Sub TextLanguage(Text As String)
+		  ' The API limits the document to 1000 characters
+		  If Text.Length > 1000 Then Text = Text.Right(1000)
+		  var oSock as new URLConnection
+		  oSock.RequestHeader("X-Api-Key") = kAPIKey
+		  
+		  AddHandler oSock.ContentReceived, WeakAddressOf SocketContentReceived
+		  AddHandler oSock.Error, WeakAddressOf SocketError
+		  
+		  maroSockets.Add(oSock)
+		  
+		  // Send the request
+		  oSock.Send("GET", "https://api.api-ninjas.com/v1/textlanguage?text=" + Text)
+		End Sub
+	#tag EndMethod
+
+
+	#tag Hook, Flags = &h0
+		Event DocumentLanguageReceived(Language As String, ISOCode As String)
+	#tag EndHook
 
 	#tag Hook, Flags = &h0
 		Event ImageTextReceived(sText as String)
